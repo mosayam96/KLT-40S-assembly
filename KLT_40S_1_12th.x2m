@@ -1,0 +1,212 @@
+*Variable,List and Module declaration
+****************************************************
+LINKED_LIST
+  KLSASSMB DISCR LIBRARY LIBRARY2 CP CALC OUT BURNUP
+  EDITION ;
+SEQ_ASCII NewBurnFile ;
+SEQ_ASCII KLTS_FIG ;
+SEQ_ASCII KLTS_HEX ;
+SEQ_ASCII CARCEL_FIG :: FILE './CARCEL20_FIG.ps' ;
+SEQ_ASCII CARCEL_PIN :: FILE './CARCEL20_PIN.dat' ;
+SEQ_BINARY Track ;
+MODULE
+  LIB: GEO: SYBILT: SHI: ASM: FLU: EDI: G2S: EVO:
+  DELETE: END: ;
+***********************************************
+LIBRARY := LIB: ::
+  NMIX 4  CTRA NONE
+    DEPL LIB: DRAGON FIL: DLIB_8R0_361                                            
+  MIXS LIB: DRAGON FIL: DLIB_8R0_361                                           
+
+*Moderator(Water) 
+  MIX 1 589.0 0.729845891                                                     
+    O16  = 'O16'  88.749                                               
+    H1   = 'H1'   11.188                                            
+    B10  = 'B10'  1.0
+* CLAD
+  MIX 2 700.0 6.55                                                      
+    ZrNat  = 'Zr91' 99.0 2
+    NbNat  = 'Nb93' 1.0
+*Fuel(U235+U238)O2+silumin
+  MIX 3 900.0 10.76
+    U235  = 'U235' 14.588 1
+    U238  = 'U238' 63.842 1
+    O16   = 'O16'  10.57 
+    Al27  = 'Al27' 9.57
+    Si28  = 'Si28' 1.21
+    Ni58  = 'Ni58' 0.22
+*Fuel(U235+U238)O2+silumin+Gd2O3
+  MIX 4 900.0 10.76
+    U235G  = 'U235' 13.771 2
+    U238G  = 'U238' 60.267 2
+    O16G   = 'O16'  10.719 2 
+    Al27G  = 'Al27' 9.034 2
+    Si28G  = 'Si28' 1.142 2
+    Ni58G  = 'Ni58' 0.208 2
+    Gd158  = 'Gd158' 4.859 2
+  ;
+*Geometry    
+KLSASSMB := GEO: :: HEX 16
+HBC S30 REFL  
+*C1 FOR GAP
+*C2 FOR FUEL
+*C3 FOR BPR SMALL
+*C4 FOR BPR LARGE 
+CELL  C1
+      C1
+      C3 C2
+      C2 C2
+      C2 C2 C2
+      C2 C2 C2
+      C4 C2 C2 C4 
+ ::: C1 := GEO: HEXCEL 1  
+  SIDE 0.5413 RADIUS 0.0 0.5    
+   MIX 1 1 ;  
+ ::: C2 := GEO: HEXCEL 2 
+  SIDE 0.5413 RADIUS 0.0 0.34 0.5
+   MIX 3 2 1 ; 
+ ::: C3 := GEO: HEXCEL 2
+  SIDE 0.5413 RADIUS 0.0 0.238 0.398
+   MIX 4 2 1 ;  
+ ::: C4 := GEO: HEXCEL 2
+  SIDE 0.5413 RADIUS 0.0 0.34 0.5  
+   MIX 4 2 1 ;  
+   ;
+CARCEL_PIN CARCEL_FIG := G2S: KLSASSMB :: EDIT 2 DRAWMIX ;
+
+*TRACKING MODULE
+*DISCR := SYBILT: KLSASSMB :: 
+*MAXR 400 MAXZ 15000 QUA2 6 3 ;
+DISCR := SYBILT: KLSASSMB ::
+       TITLE 'VVER ASSEMBLY - SELF-SHIELDING - CCCP'
+       EDIT 6 MAXR 2000 MAXJ 6000 MAXZ 100000
+       QUA2 12 6
+       DP01
+       ;
+*SHI MODULE
+LIBRARY2 := SHI: LIBRARY DISCR :: EDIT 0 NOLJ ;
+*ASM module
+CP := ASM: LIBRARY2 DISCR ;
+*FLU Module
+CALC := FLU: CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+
+*******************Burnup module********************
+****************************************************
+BURNUP LIBRARY2 := EVO: LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 0.0 100.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 0.25 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 100.0 200.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 200.0 300.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 300.0 400.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 400.0 500.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 500.0 600.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 600.0 700.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 700.0 800.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 800.0 900.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+****************************************************
+BURNUP LIBRARY2 := EVO: BURNUP LIBRARY2 CALC DISCR ::
+EDIT 3 DEPL 900.0 1000.0 DAY
+POWR 117.8 ;
+*FLU Module
+CALC := FLU: CALC CP LIBRARY2 DISCR ::
+  TYPE K ;
+*EDITION MODULE
+EDITION := EDI: EDITION CALC LIBRARY2 DISCR ::
+EDIT 1 MERG MIX 1 2 3 4 COND 4.0 100.0 STAT ALL REFE 1 ;
+*******************************************************
+
+*DELETE MODULE
+DISCR CP := DELETE: DISCR CP ;
+END: ;   
+QUIT "LIST" .
